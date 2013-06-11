@@ -1,4 +1,4 @@
-VersionOne.Integration.Subversion
-=================================
+# VersionOne Integration for Subversion
 
-view code changes associated with a workitem
+## Code Coming Soon!
+If you are interested in contributing to this project, please contact [Ian Buchanan](mailto:ian.buchanan@versionone.com).
