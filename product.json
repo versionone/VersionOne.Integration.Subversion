@@ -85,14 +85,14 @@
     },
     "mediaSection": [
         {
-            "title": "Integrating Code Changes and Workitems",
-            "caption": "view code changes for a workitem",
+            "title": "Demonstration",
+            "caption": "View code changes for a workitem",
             "mimetype": "video/x-flv",
             "href": "http://vtv.v1host.com/permalink/?title=SCM%3A%20Subversion&category=Integrations&edition=enterprise&release=undefined",
             "thumbhref": "http://community.versionone.com/attachments/imagefolder/gettingstarted/video.png"
         },
         {
-            "title": "Configuration",
+            "title": "Getting Started",
             "caption": "Installing and configuring the integration",
             "mimetype": "video/x-flv",
             "href": "https://vtv.v1host.com/permalink/?title=Configuring%20Subversion&category=Integrations&edition=enterprise&release=undefined",
