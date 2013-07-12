@@ -21,7 +21,7 @@
         {
             "type": "documentation",
             "title": "Documentation",
-            "href": "http://community.versionone.com/sdk/DetailedDocumentation/Subversion/index.html"
+            "href": "http://legacy.community.versionone.com/sdk/DetailedDocumentation/Subversion/index.html"
         },
         {
             "type": "license",
@@ -34,7 +34,7 @@
             {
                 "date": "2012-11-01T00:00:00.000Z",
                 "description": "Winter 2012",
-                "version": "2117",
+                "version": "8.3.0.2117",
                 "releaseNotes": " * Updated: Sharp SVN DLL to 1.7. \n * Added: Logging of connection information on start-up.",
                 "qualityBand": "mature",
                 "downloadUrl": "http://platform.versionone.com.s3.amazonaws.com/downloads/V1SvnIntegration.8.3.zip"
