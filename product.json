@@ -89,14 +89,14 @@
             "caption": "view code changes for a workitem",
             "mimetype": "video/x-flv",
             "href": "http://vtv.v1host.com/permalink/?title=SCM%3A%20Subversion&category=Integrations&edition=enterprise&release=undefined",
-            "thumbhref": "http://community.versionone.com/attachments/imagefolder/gettingstarted/video.png"
+            "thumbhref": "http://legacy.community.versionone.com/attachments/imagefolder/gettingstarted/video.png"
         },
         {
             "title": "Configuration",
             "caption": "Installing and configuring the integration",
             "mimetype": "video/x-flv",
             "href": "https://vtv.v1host.com/permalink/?title=Configuring%20Subversion&category=Integrations&edition=enterprise&release=undefined",
-            "thumbhref": "http://community.versionone.com/attachments/imagefolder/gettingstarted/video.png"
+            "thumbhref": "http://legacy.community.versionone.com/attachments/imagefolder/gettingstarted/video.png"
         }
     ]
 }
