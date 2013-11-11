@@ -23,7 +23,7 @@ namespace VersionOne.ServiceHost.SubversionServices
         private LinkInfo linkInfo;
 
         private string repositoryFriendlyNameSpec;
-        private string repositoryUuid;
+        //private string repositoryUuid;
 
         private SvnInformation svnInfo;
 
