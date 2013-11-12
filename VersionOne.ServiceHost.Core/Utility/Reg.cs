@@ -27,8 +27,8 @@ namespace VersionOne.ServiceHost.Core
 				case "HKEY_CURRENT_CONFIG":
 					return Registry.CurrentConfig;
 
-				case "HKEY_DYN_DATA":
-					return Registry.DynData;
+                //case "HKEY_DYN_DATA":
+                //    return Registry.DynData;
 
 				case "HKEY_PERFORMANCE_DATA":
 					return Registry.PerformanceData;

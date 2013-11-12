@@ -119,7 +119,8 @@ namespace VersionOne.ServiceHost.SubversionServices
             return target;
         }
 
-        private static SvnUriTarget CreateSvnUriTarget(string uriString, SvnRevision revision) {
+        private static SvnUriTarget CreateSvnUriTarget(string uriString, SvnRevision revision) 
+        {
             Uri uri = new Uri(uriString);
             SvnUriTarget target = new SvnUriTarget(uri, revision);
             return target;
@@ -139,9 +140,13 @@ namespace VersionOne.ServiceHost.SubversionServices
             try 
             {
                 SvnPropertyCollection propertyCollection;
+
+                //client.GetRevisionPropertyList(CreateSvnUriTarget(url, revision), out propertyCollection);
                 client.GetRevisionPropertyList(CreateSvnUriTarget(url, revision), out propertyCollection);
+
                 RevisionPropertyCollection revisionPropertyCollection = new RevisionPropertyCollection((int)revision.Revision);
-                foreach (SvnPropertyValue value in propertyCollection) {
+                foreach (SvnPropertyValue value in propertyCollection) 
+                {
                     revisionPropertyCollection.Add(value.Key, value.StringValue);
                 }
                 return revisionPropertyCollection;
