@@ -112,7 +112,7 @@ namespace VersionOne.ServiceHost.SubversionServices
                 Logger.Log(string.Format("Using existing Change Set: {0} ({1})", info.Revision, changeSet.Oid));
             } else {
                 if(ShouldCreate(affectedworkitems)) {
-                    changeSet = Central.Services.New(ChangeSetType, Oid.Null);
+                    changeSet = V1Connection.Service.New(ChangeSetType, Oid.Null);
                     changeSet.SetAttributeValue(ChangeSetReferenceDef, info.Revision);
                     changeSet.SetAttributeValue(ChangeSetRepositoryIdDef, info.RepositoryId);
                 } else {
@@ -146,7 +146,7 @@ namespace VersionOne.ServiceHost.SubversionServices
 
             q.Filter = term;
             q.Paging = new Paging(0, 1);
-            return Central.Services.Retrieve(q);
+            return V1Connection.Service.Retrieve(q);
         }
 
         private IList<Oid> FindWorkitemOid(string reference) 
@@ -156,7 +156,7 @@ namespace VersionOne.ServiceHost.SubversionServices
             var term = new FilterTerm(PrimaryWorkitemReferenceDef);
             term.Equal(reference);
             q.Filter = term;
-            var list = Central.Services.Retrieve(q).Assets;
+            var list = V1Connection.Service.Retrieve(q).Assets;
 
             foreach(var asset in list) {
                 if(!oids.Contains(asset.Oid)) {
@@ -208,7 +208,7 @@ namespace VersionOne.ServiceHost.SubversionServices
                 changeSet.AddAttributeValue(ChangeSetPrimaryWorkitemsDef, oid);
             }
 
-            Central.Services.Save(changeSet, changecomment);
+            V1Connection.Service.Save(changeSet, changecomment);
             return changeSet;
         }
 
@@ -226,12 +226,12 @@ namespace VersionOne.ServiceHost.SubversionServices
                 }
             }
 
-            var newlink = Central.Services.New(LinkType, savedAsset.Oid.Momentless);
+            var newlink = V1Connection.Service.New(LinkType, savedAsset.Oid.Momentless);
             newlink.SetAttributeValue(LinkNameDef, name);
             newlink.SetAttributeValue(LinkUrlDef, url);
             newlink.SetAttributeValue(LinkOnMenuDef, info.Link.OnMenu);
 
-            Central.Services.Save(newlink, changecomment);
+            V1Connection.Service.Save(newlink, changecomment);
         }
 
         #region Meta Properties
@@ -244,60 +244,60 @@ namespace VersionOne.ServiceHost.SubversionServices
             };
 
         private IAssetType ChangeSetType {
-            get { return Central.MetaModel.GetAssetType("ChangeSet"); }
+            get { return V1Connection.Meta.GetAssetType("ChangeSet"); }
         }
 
         private IAttributeDefinition ChangeSetPrimaryWorkitemsDef {
-            get { return Central.MetaModel.GetAttributeDefinition("ChangeSet.PrimaryWorkitems"); }
+            get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet.PrimaryWorkitems"); }
         }
 
         private IAttributeDefinition ChangeSetNameDef {
-            get { return Central.MetaModel.GetAttributeDefinition("ChangeSet.Name"); }
+            get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet.Name"); }
         }
 
         private IAttributeDefinition ChangeSetReferenceDef {
-            get { return Central.MetaModel.GetAttributeDefinition("ChangeSet.Reference"); }
+            get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet.Reference"); }
         }
 
         private IAttributeDefinition ChangeSetDescriptionDef {
-            get { return Central.MetaModel.GetAttributeDefinition("ChangeSet.Description"); }
+            get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet.Description"); }
         }
 
         private IAttributeDefinition ChangeSetRepositoryIdDef {
-            get { return Central.MetaModel.GetAttributeDefinition("ChangeSet." + customRepositoryIdField); }
+            get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet." + customRepositoryIdField); }
         }
 
         private IAttributeDefinition ChangeSetRepositoryFriendlyNameDef {
-            get { return Central.MetaModel.GetAttributeDefinition("ChangeSet." + customRepositoryFriendlyNameField); }
+            get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet." + customRepositoryFriendlyNameField); }
         }
 
         private IAssetType PrimaryWorkitemType {
-            get { return Central.MetaModel.GetAssetType("PrimaryWorkitem"); }
+            get { return V1Connection.Meta.GetAssetType("PrimaryWorkitem"); }
         }
 
         private IAttributeDefinition PrimaryWorkitemReferenceDef {
-            get { return Central.MetaModel.GetAttributeDefinition("PrimaryWorkitem.ChildrenMeAndDown." + referencename); }
+            get { return V1Connection.Meta.GetAttributeDefinition("PrimaryWorkitem.ChildrenMeAndDown." + referencename); }
         }
 
         private IAttributeDefinition LinkNameDef {
-            get { return Central.MetaModel.GetAttributeDefinition("Link.Name"); }
+            get { return V1Connection.Meta.GetAttributeDefinition("Link.Name"); }
         }
 
         private IAttributeDefinition LinkUrlDef {
-            get { return Central.MetaModel.GetAttributeDefinition("Link.URL"); }
+            get { return V1Connection.Meta.GetAttributeDefinition("Link.URL"); }
         }
 
         private IAttributeDefinition LinkOnMenuDef {
-            get { return Central.MetaModel.GetAttributeDefinition("Link.OnMenu"); }
+            get { return V1Connection.Meta.GetAttributeDefinition("Link.OnMenu"); }
         }
 
-        private new string StoryName {
-            get { return Central.Loc.Resolve("Plural'Story"); }
-        }
+        //private new string StoryName {
+        //    get { return Central.Loc.Resolve("Plural'Story"); }
+        //}
 
-        private new string DefectName {
-            get { return Central.Loc.Resolve("Plural'Defect"); }
-        }
+        //private new string DefectName {
+        //    get { return Central.Loc.Resolve("Plural'Defect"); }
+        //}
 
         protected override IEnumerable<NeededAssetType> NeededAssetTypes {
             get { return neededassettypes; }
