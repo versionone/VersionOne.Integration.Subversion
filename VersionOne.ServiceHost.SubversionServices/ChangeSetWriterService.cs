@@ -31,12 +31,10 @@ namespace VersionOne.ServiceHost.SubversionServices
         private const string AlwaysCreateField = "AlwaysCreate";
         private const string RepositoryIdField = "RepositoryIdField";
         private const string FriendlyRepositoryNameField = "RepositoryFriendlyNameField";
-
         private const string CustomFieldPrefix = "Custom_";
 
         private bool alwaysCreate;
         private string changecomment;
-
         private string customRepositoryFriendlyNameField;
         private string customRepositoryIdField;
         private string referencename;
@@ -48,18 +46,21 @@ namespace VersionOne.ServiceHost.SubversionServices
             referencename = config[ReferenceAttributeField].InnerText;
 
             bool alwaysCreateValue = false;
-            if(config[AlwaysCreateField] != null) {
+            if(config[AlwaysCreateField] != null) 
+            {
                 bool.TryParse(config[AlwaysCreateField].InnerText, out alwaysCreateValue);
             }
             alwaysCreate = alwaysCreateValue;
 
             XmlElement repositoryIdElement = config[RepositoryIdField];
-            if(repositoryIdElement == null || string.IsNullOrEmpty(repositoryIdElement.InnerText)) {
+            if(repositoryIdElement == null || string.IsNullOrEmpty(repositoryIdElement.InnerText)) 
+            {
                 throw new ConfigurationException("Mandatory configuration property RepositoryIdField is not provided.");
             }
 
             XmlElement repositoryNameElement = config[FriendlyRepositoryNameField];
-            if(repositoryNameElement == null || string.IsNullOrEmpty(repositoryNameElement.InnerText)) {
+            if(repositoryNameElement == null || string.IsNullOrEmpty(repositoryNameElement.InnerText)) 
+            {
                 throw new ConfigurationException("Mandatory configuration property RepositoryFriendlyNameField is not provided.");
             }
 
@@ -80,9 +81,12 @@ namespace VersionOne.ServiceHost.SubversionServices
         {
             var info = (ChangeSetInfo)pubobj;
 
-            try {
+            try 
+            {
                 ProcessChangeSetInfo(info);
-            } catch(Exception ex) {
+            } 
+            catch(Exception ex) 
+            {
                 Logger.Log(string.Format("Process Change Set {0} Info Failed: {1}", info.Revision, ex));
             }
         }
@@ -92,13 +96,15 @@ namespace VersionOne.ServiceHost.SubversionServices
             IList<Oid> affectedworkitems = GetAffectedWorkitems(info.References);
 
             Asset changeSet = GetChangeSet(info, affectedworkitems);
-            if(changeSet == null) {
+            if(changeSet == null) 
+            {
                 return;
             }
 
             Asset savedAsset = SaveChangeSetAsset(changeSet, info, affectedworkitems);
 
-            if(info.Link != null) {
+            if(info.Link != null) 
+            {
                 SaveChangeSetLink(info, savedAsset);
             }
         }
@@ -107,15 +113,21 @@ namespace VersionOne.ServiceHost.SubversionServices
         {
             Asset changeSet = null;
             AssetList list = FindExistingChangeset(info.Revision, info.RepositoryId).Assets;
-            if(list.Count > 0) {
+            if(list.Count > 0) 
+            {
                 changeSet = list[0];
                 Logger.Log(string.Format("Using existing Change Set: {0} ({1})", info.Revision, changeSet.Oid));
-            } else {
-                if(ShouldCreate(affectedworkitems)) {
-                    changeSet = V1Connection.Service.New(ChangeSetType, Oid.Null);
+            } 
+            else 
+            {
+                if(ShouldCreate(affectedworkitems)) 
+                {
+                    changeSet = V1Connection.Data.New(ChangeSetType, Oid.Null);
                     changeSet.SetAttributeValue(ChangeSetReferenceDef, info.Revision);
                     changeSet.SetAttributeValue(ChangeSetRepositoryIdDef, info.RepositoryId);
-                } else {
+                } 
+                else 
+                {
                     Logger.Log("No Change Set References. Ignoring Change Set: " + info.Revision);
                 }
             }
@@ -138,7 +150,8 @@ namespace VersionOne.ServiceHost.SubversionServices
 
             IFilterTerm term = referenceTerm;
 
-            if(!string.IsNullOrEmpty(customRepositoryIdField) && !string.IsNullOrEmpty(repositoryId)) {
+            if(!string.IsNullOrEmpty(customRepositoryIdField) && !string.IsNullOrEmpty(repositoryId)) 
+            {
                 var uuidTerm = new FilterTerm(ChangeSetType.GetAttributeDefinition(customRepositoryIdField));
                 uuidTerm.Equal(repositoryId);
                 term = new AndFilterTerm(referenceTerm, uuidTerm);
@@ -146,7 +159,8 @@ namespace VersionOne.ServiceHost.SubversionServices
 
             q.Filter = term;
             q.Paging = new Paging(0, 1);
-            return V1Connection.Service.Retrieve(q);
+
+            return V1Connection.Data.Retrieve(q);
         }
 
         private IList<Oid> FindWorkitemOid(string reference) 
@@ -156,10 +170,14 @@ namespace VersionOne.ServiceHost.SubversionServices
             var term = new FilterTerm(PrimaryWorkitemReferenceDef);
             term.Equal(reference);
             q.Filter = term;
-            var list = V1Connection.Service.Retrieve(q).Assets;
 
-            foreach(var asset in list) {
-                if(!oids.Contains(asset.Oid)) {
+            AssetList list;
+            list = V1Connection.Data.Retrieve(q).Assets;
+
+            foreach(var asset in list) 
+            {
+                if(!oids.Contains(asset.Oid))
+                {
                     oids.Add(asset.Oid);
                 }
             }
@@ -170,10 +188,12 @@ namespace VersionOne.ServiceHost.SubversionServices
         {
             var primaryworkitems = new List<Oid>();
 
-            foreach(var reference in references) {
+            foreach(var reference in references) 
+            {
                 var workitemoids = FindWorkitemOid(reference);
 
-                if(workitemoids == null || workitemoids.Count == 0) {
+                if(workitemoids == null || workitemoids.Count == 0)
+                {
                     Logger.Log(string.Format("No {0} or {1} related to reference: {2}", StoryName, DefectName, reference));
                     continue;
                 }
@@ -196,19 +216,22 @@ namespace VersionOne.ServiceHost.SubversionServices
             changeSet.SetAttributeValue(ChangeSetNameDef, string.Format("'{0}' on '{1}'", info.Author, GetFormattedTime(info.ChangeDate)));
             changeSet.SetAttributeValue(ChangeSetDescriptionDef, info.Message);
 
-            if(!string.IsNullOrEmpty(info.RepositoryId) && !string.IsNullOrEmpty(customRepositoryIdField)) {
+            if(!string.IsNullOrEmpty(info.RepositoryId) && !string.IsNullOrEmpty(customRepositoryIdField)) 
+            {
                 changeSet.SetAttributeValue(ChangeSetRepositoryIdDef, info.RepositoryId);
             }
 
-            if(!string.IsNullOrEmpty(info.RepositoryFriendlyName) && !string.IsNullOrEmpty(customRepositoryFriendlyNameField)) {
+            if(!string.IsNullOrEmpty(info.RepositoryFriendlyName) && !string.IsNullOrEmpty(customRepositoryFriendlyNameField)) 
+            {
                 changeSet.SetAttributeValue(ChangeSetRepositoryFriendlyNameDef, info.RepositoryFriendlyName);
             }
 
-            foreach(Oid oid in primaryworkitems) {
+            foreach(Oid oid in primaryworkitems) 
+            {
                 changeSet.AddAttributeValue(ChangeSetPrimaryWorkitemsDef, oid);
             }
 
-            V1Connection.Service.Save(changeSet, changecomment);
+            V1Connection.Data.Save(changeSet, changecomment);
             return changeSet;
         }
 
@@ -218,20 +241,23 @@ namespace VersionOne.ServiceHost.SubversionServices
             var url = string.Format(info.Link.Url, info.Revision);
             var linkUrlAttribute = savedAsset.GetAttribute(ChangeSetType.GetAttributeDefinition("Links.URL"));
 
-            if(linkUrlAttribute != null) {
-                foreach(string value in linkUrlAttribute.Values) {
-                    if(value.Equals(url, StringComparison.InvariantCultureIgnoreCase)) {
+            if(linkUrlAttribute != null) 
+            {
+                foreach(string value in linkUrlAttribute.Values) 
+                {
+                    if(value.Equals(url, StringComparison.InvariantCultureIgnoreCase)) 
+                    {
                         return;
                     }
                 }
             }
 
-            var newlink = V1Connection.Service.New(LinkType, savedAsset.Oid.Momentless);
+            var newlink = V1Connection.Data.New(LinkType, savedAsset.Oid.Momentless);
             newlink.SetAttributeValue(LinkNameDef, name);
             newlink.SetAttributeValue(LinkUrlDef, url);
             newlink.SetAttributeValue(LinkOnMenuDef, info.Link.OnMenu);
 
-            V1Connection.Service.Save(newlink, changecomment);
+            V1Connection.Data.Save(newlink, changecomment);
         }
 
         #region Meta Properties
@@ -243,65 +269,21 @@ namespace VersionOne.ServiceHost.SubversionServices
                 new NeededAssetType("Link", new[] {"Name", "URL", "OnMenu"}),
             };
 
-        private IAssetType ChangeSetType {
-            get { return V1Connection.Meta.GetAssetType("ChangeSet"); }
-        }
-
-        private IAttributeDefinition ChangeSetPrimaryWorkitemsDef {
-            get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet.PrimaryWorkitems"); }
-        }
-
-        private IAttributeDefinition ChangeSetNameDef {
-            get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet.Name"); }
-        }
-
-        private IAttributeDefinition ChangeSetReferenceDef {
-            get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet.Reference"); }
-        }
-
-        private IAttributeDefinition ChangeSetDescriptionDef {
-            get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet.Description"); }
-        }
-
-        private IAttributeDefinition ChangeSetRepositoryIdDef {
-            get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet." + customRepositoryIdField); }
-        }
-
-        private IAttributeDefinition ChangeSetRepositoryFriendlyNameDef {
-            get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet." + customRepositoryFriendlyNameField); }
-        }
-
-        private IAssetType PrimaryWorkitemType {
-            get { return V1Connection.Meta.GetAssetType("PrimaryWorkitem"); }
-        }
-
-        private IAttributeDefinition PrimaryWorkitemReferenceDef {
-            get { return V1Connection.Meta.GetAttributeDefinition("PrimaryWorkitem.ChildrenMeAndDown." + referencename); }
-        }
-
-        private IAttributeDefinition LinkNameDef {
-            get { return V1Connection.Meta.GetAttributeDefinition("Link.Name"); }
-        }
-
-        private IAttributeDefinition LinkUrlDef {
-            get { return V1Connection.Meta.GetAttributeDefinition("Link.URL"); }
-        }
-
-        private IAttributeDefinition LinkOnMenuDef {
-            get { return V1Connection.Meta.GetAttributeDefinition("Link.OnMenu"); }
-        }
-
-        //private new string StoryName {
-        //    get { return Central.Loc.Resolve("Plural'Story"); }
-        //}
-
-        //private new string DefectName {
-        //    get { return Central.Loc.Resolve("Plural'Defect"); }
-        //}
-
-        protected override IEnumerable<NeededAssetType> NeededAssetTypes {
-            get { return neededassettypes; }
-        }
+        private IAssetType ChangeSetType { get { return V1Connection.Meta.GetAssetType("ChangeSet"); } }
+        private IAttributeDefinition ChangeSetPrimaryWorkitemsDef { get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet.PrimaryWorkitems"); } }
+        private IAttributeDefinition ChangeSetNameDef { get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet.Name"); } }
+        private IAttributeDefinition ChangeSetReferenceDef { get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet.Reference"); } }
+        private IAttributeDefinition ChangeSetDescriptionDef { get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet.Description"); } }
+        private IAttributeDefinition ChangeSetRepositoryIdDef { get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet." + customRepositoryIdField); } }
+        private IAttributeDefinition ChangeSetRepositoryFriendlyNameDef { get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet." + customRepositoryFriendlyNameField); } }
+        private IAssetType PrimaryWorkitemType { get { return V1Connection.Meta.GetAssetType("PrimaryWorkitem"); } }
+        private IAttributeDefinition PrimaryWorkitemReferenceDef { get { return V1Connection.Meta.GetAttributeDefinition("PrimaryWorkitem.ChildrenMeAndDown." + referencename); } }
+        private IAttributeDefinition LinkNameDef { get { return V1Connection.Meta.GetAttributeDefinition("Link.Name"); } }
+        private IAttributeDefinition LinkUrlDef { get { return V1Connection.Meta.GetAttributeDefinition("Link.URL"); } }
+        private IAttributeDefinition LinkOnMenuDef { get { return V1Connection.Meta.GetAttributeDefinition("Link.OnMenu"); } }
+        //private new string StoryName { get { return Central.Loc.Resolve("Plural'Story"); } }
+        //private new string DefectName { get { return Central.Loc.Resolve("Plural'Defect"); } }
+        protected override IEnumerable<NeededAssetType> NeededAssetTypes { get { return neededassettypes; } }
 
         #endregion
     }

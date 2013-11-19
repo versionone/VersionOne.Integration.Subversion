@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 
 #if !DEBUG
 [assembly: AssemblyDelaySign(false)]
-[assembly: AssemblyKeyFile("..\\..\\..\\Common\\SigningKey\\VersionOne.snk")]
 [assembly: AssemblyKeyName("")]
 #endif
 [assembly: AssemblyCompanyAttribute("VersionOne")]
