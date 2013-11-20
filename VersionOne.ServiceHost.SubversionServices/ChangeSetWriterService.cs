@@ -281,8 +281,8 @@ namespace VersionOne.ServiceHost.SubversionServices
         private IAttributeDefinition LinkNameDef { get { return V1Connection.Meta.GetAttributeDefinition("Link.Name"); } }
         private IAttributeDefinition LinkUrlDef { get { return V1Connection.Meta.GetAttributeDefinition("Link.URL"); } }
         private IAttributeDefinition LinkOnMenuDef { get { return V1Connection.Meta.GetAttributeDefinition("Link.OnMenu"); } }
-        //private new string StoryName { get { return Central.Loc.Resolve("Plural'Story"); } }
-        //private new string DefectName { get { return Central.Loc.Resolve("Plural'Defect"); } }
+        private new string StoryName { get { return V1Connection.Localization.Resolve("Plural'Story"); } }
+        private new string DefectName { get { return V1Connection.Localization.Resolve("Plural'Defect"); } }
         protected override IEnumerable<NeededAssetType> NeededAssetTypes { get { return neededassettypes; } }
 
         #endregion

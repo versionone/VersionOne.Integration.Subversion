@@ -16,11 +16,13 @@ namespace VersionOne.ServiceHost.Core.Services
     {
         public readonly IMetaModel Meta;
         public readonly IServices Data;
+        public readonly ILocalizer Localization;
         
-        public V1Connection(IMetaModel meta, IServices data)
+        public V1Connection(IMetaModel meta, IServices data, ILocalizer local)
         {
             Meta = meta;
             Data = data;
+            Localization = local;
         }
     }
 
@@ -45,6 +47,7 @@ namespace VersionOne.ServiceHost.Core.Services
                     {
                         IMetaModel metaService;
                         IServices dataService;
+                        ILocalizer localService;
 
                         //Use OAuth.
                         if (File.Exists("client_secrets.json") == true)
@@ -56,8 +59,11 @@ namespace VersionOne.ServiceHost.Core.Services
 
                             V1OAuth2APIConnector metaConnector = new V1OAuth2APIConnector(baseUrl + "/meta.v1/");
                             V1OAuth2APIConnector dataConnector = new V1OAuth2APIConnector(baseUrl + "/rest-1.oauth.v1/");
+                            V1APIConnector localConnector = new V1APIConnector(baseUrl + "/loc.v1/");
+
                             metaService = new VersionOne.SDK.APIClient.MetaModel(metaConnector);
                             dataService = new VersionOne.SDK.APIClient.Services(metaService, dataConnector);
+                            localService = new VersionOne.SDK.APIClient.Localizer(localConnector);
                         }
 
                         //Use Basic|Windows.
@@ -70,11 +76,14 @@ namespace VersionOne.ServiceHost.Core.Services
 
                             V1APIConnector metaConnector = new V1APIConnector(baseUrl + "meta.v1/");
                             V1APIConnector dataConnector = new V1APIConnector(baseUrl + "rest-1.v1/", username, password, authType);
+                            V1APIConnector localConnector = new V1APIConnector(baseUrl + "loc.v1/");
+
                             metaService = new VersionOne.SDK.APIClient.MetaModel(metaConnector);
                             dataService = new VersionOne.SDK.APIClient.Services(metaService, dataConnector);
+                            localService = new VersionOne.SDK.APIClient.Localizer(localConnector);
                         }
 
-                        _v1Connection = new V1Connection(metaService, dataService);
+                        _v1Connection = new V1Connection(metaService, dataService, localService);
                         LogVersionOneConnectionInformation(V1Connection.Meta, V1Connection.Data);
                     }
                     catch (Exception ex)
@@ -120,8 +129,7 @@ namespace VersionOne.ServiceHost.Core.Services
 
             var asset = service.Retrieve(query).Assets[0];
             var role = asset.GetAttribute(defaultRoleAttribute);
-            //return Central.Loc.Resolve(role.Value.ToString());
-            return role.Value.ToString();
+            return V1Connection.Localization.Resolve(role.Value.ToString());
         }
 
         public virtual void Initialize(XmlElement config, IEventManager eventManager, IProfile profile) 
