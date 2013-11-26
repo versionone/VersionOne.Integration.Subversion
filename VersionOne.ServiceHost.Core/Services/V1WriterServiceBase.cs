@@ -5,12 +5,30 @@ using VersionOne.SDK.APIClient;
 using VersionOne.ServiceHost.Eventing;
 using VersionOne.Profile;
 using VersionOne.ServiceHost.Core.Logging;
+using System.IO;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace VersionOne.ServiceHost.Core.Services 
 {
+
+    public class V1Connection
+    {
+        public readonly IMetaModel Meta;
+        public readonly IServices Data;
+        public readonly ILocalizer Localization;
+        
+        public V1Connection(IMetaModel meta, IServices data, ILocalizer local)
+        {
+            Meta = meta;
+            Data = data;
+            Localization = local;
+        }
+    }
+
     public abstract class V1WriterServiceBase : IHostedService 
     {
-        private ICentral central;
+        private V1Connection _v1Connection;
         protected XmlElement Config;
         protected IEventManager EventManager;
         protected ILogger Logger;
@@ -18,37 +36,82 @@ namespace VersionOne.ServiceHost.Core.Services
         private const string MemberType = "Member";
         private const string DefaultRoleNameProperty = "DefaultRole.Name";
 
-        protected virtual ICentral Central 
+        //Note that when using OAuth, the client_secrets.json and stored_credentials.json files must exist in the application folder.
+        protected virtual V1Connection V1Connection
         {
-            get 
+            get
             {
-                if (central == null) 
+                if (_v1Connection == null)
                 {
-                    try 
+                    try
                     {
-                        V1Central c = new V1Central(Config["Settings"]);
-                        c.Validate();
-                        central = c;
+                        IMetaModel metaService;
+                        IServices dataService;
+                        ILocalizer localService;
 
-                        LogVersionOneConnectionInformation();
-                    } 
-                    catch (Exception ex) 
+                        //Use OAuth.
+                        if (File.Exists("client_secrets.json") == true)
+                        {
+                            if (File.Exists("stored_credentials.json") == false)
+                                throw new Exception("The stored_credentials.json file was not found.");
+
+                            string baseUrl = GetBaseURLFromJSONFile("client_secrets.json");
+
+                            V1OAuth2APIConnector metaConnector = new V1OAuth2APIConnector(baseUrl + "/meta.v1/");
+                            V1OAuth2APIConnector dataConnector = new V1OAuth2APIConnector(baseUrl + "/rest-1.oauth.v1/");
+                            V1APIConnector localConnector = new V1APIConnector(baseUrl + "/loc.v1/");
+
+                            metaService = new VersionOne.SDK.APIClient.MetaModel(metaConnector);
+                            dataService = new VersionOne.SDK.APIClient.Services(metaService, dataConnector);
+                            localService = new VersionOne.SDK.APIClient.Localizer(localConnector);
+                        }
+
+                        //Use Basic|Windows.
+                        else
+                        {
+                            string baseUrl = Config["Settings"].SelectSingleNode("ApplicationUrl").InnerText;
+                            string username = Config["Settings"].SelectSingleNode("Username").InnerText;
+                            string password = Config["Settings"].SelectSingleNode("Password").InnerText;
+                            bool authType = Config["Settings"].SelectSingleNode("IntegratedAuth").InnerText == "true" ? true : false;
+
+                            V1APIConnector metaConnector = new V1APIConnector(baseUrl + "meta.v1/");
+                            V1APIConnector dataConnector = new V1APIConnector(baseUrl + "rest-1.v1/", username, password, authType);
+                            V1APIConnector localConnector = new V1APIConnector(baseUrl + "loc.v1/");
+
+                            metaService = new VersionOne.SDK.APIClient.MetaModel(metaConnector);
+                            dataService = new VersionOne.SDK.APIClient.Services(metaService, dataConnector);
+                            localService = new VersionOne.SDK.APIClient.Localizer(localConnector);
+                        }
+
+                        _v1Connection = new V1Connection(metaService, dataService, localService);
+                        LogVersionOneConnectionInformation(V1Connection.Meta, V1Connection.Data);
+                    }
+                    catch (Exception ex)
                     {
-                        Logger.Log("Failed to connect to VersionOne server", ex);
+                        Logger.Log("Failed to connect to VersionOne instance.", ex);
                         throw;
                     }
                 }
-                return central;
+                return _v1Connection;
             }
         }
 
-        private void LogVersionOneConnectionInformation() 
+        private string GetBaseURLFromJSONFile(string JSONFileName)
+        {
+            using (StreamReader reader = File.OpenText(JSONFileName))
+            {
+                JObject json = (JObject)JToken.ReadFrom(new JsonTextReader(reader));
+                return (string)json["installed"]["server_base_uri"];
+            }
+        }
+
+        private void LogVersionOneConnectionInformation(IMetaModel meta, IServices service) 
         {
             try 
             {
-                var metaVersion = ((MetaModel) Central.MetaModel).Version.ToString();
-                var memberOid = Central.Services.LoggedIn.Momentless.ToString();
-                var defaultRole = GetLoggedInMemberRole();
+                string metaVersion = ((MetaModel)meta).Version.ToString();
+                string memberOid = service.LoggedIn.Momentless.ToString();
+                string defaultRole = GetLoggedInMemberRole(meta, service);
 
                 Logger.LogVersionOneConnectionInformation(LogMessage.SeverityType.Info, metaVersion, memberOid, defaultRole);
             } 
@@ -58,15 +121,15 @@ namespace VersionOne.ServiceHost.Core.Services
             }
         }
 
-        private string GetLoggedInMemberRole() 
+        private string GetLoggedInMemberRole(IMetaModel meta, IServices service) 
         {
-            var query = new Query(Central.Services.LoggedIn);
-            var defaultRoleAttribute = Central.MetaModel.GetAssetType(MemberType).GetAttributeDefinition(DefaultRoleNameProperty);
+            var query = new Query(service.LoggedIn);
+            var defaultRoleAttribute = meta.GetAssetType(MemberType).GetAttributeDefinition(DefaultRoleNameProperty);
             query.Selection.Add(defaultRoleAttribute);
 
-            var asset = Central.Services.Retrieve(query).Assets[0];
+            var asset = service.Retrieve(query).Assets[0];
             var role = asset.GetAttribute(defaultRoleAttribute);
-            return Central.Loc.Resolve(role.Value.ToString());
+            return V1Connection.Localization.Resolve(role.Value.ToString());
         }
 
         public virtual void Initialize(XmlElement config, IEventManager eventManager, IProfile profile) 
@@ -74,7 +137,6 @@ namespace VersionOne.ServiceHost.Core.Services
             Config = config;
             EventManager = eventManager;
             Logger = new Logger(eventManager);
-            
             Logger.LogVersionOneConfiguration(LogMessage.SeverityType.Info, Config["Settings"]);
         }
 
@@ -94,7 +156,7 @@ namespace VersionOne.ServiceHost.Core.Services
             } 
             catch (MetaException ex) 
             {
-                throw new ApplicationException("Necessary meta is not present in this VersionOne system", ex);
+                throw new ApplicationException("Necessary meta is not present in this VersionOne instance.", ex);
             }
         }
 
@@ -116,7 +178,9 @@ namespace VersionOne.ServiceHost.Core.Services
         {
             foreach(var neededAssetType in neededassettypes) 
             {
-                var assettype = Central.MetaModel.GetAssetType(neededAssetType.Name);
+                IAssetType assettype;
+                assettype = V1Connection.Meta.GetAssetType(neededAssetType.Name);
+
                 foreach(var attributeDefinitionName in neededAssetType.AttributeDefinitionNames) 
                 {
                     var attribdef = assettype.GetAttributeDefinition(attributeDefinitionName);
@@ -126,12 +190,14 @@ namespace VersionOne.ServiceHost.Core.Services
 
         #region Meta wrappers
 
-        protected IAssetType RequestType { get { return Central.MetaModel.GetAssetType("Request"); } }
-        protected IAssetType DefectType { get { return Central.MetaModel.GetAssetType("Defect"); } }
-        protected IAssetType StoryType { get { return Central.MetaModel.GetAssetType("Story"); } }
-        protected IAssetType ReleaseVersionType { get { return Central.MetaModel.GetAssetType("StoryCategory"); } }
-        protected IAssetType LinkType { get { return Central.MetaModel.GetAssetType("Link"); } }
-        protected IAssetType NoteType { get { return Central.MetaModel.GetAssetType("Note"); } }
+        protected IAssetType RequestType { get { return V1Connection.Meta.GetAssetType("Request"); } }
+        protected IAssetType DefectType { get { return V1Connection.Meta.GetAssetType("Defect"); } }
+        protected IAssetType StoryType { get { return V1Connection.Meta.GetAssetType("Story"); } }
+        protected IAssetType ReleaseVersionType { get { return V1Connection.Meta.GetAssetType("StoryCategory"); } }
+        protected IAssetType LinkType { get { return V1Connection.Meta.GetAssetType("Link"); } }
+        protected IAssetType NoteType { get { return V1Connection.Meta.GetAssetType("Note"); } }
+        protected IOperation RequestInactivate { get { return V1Connection.Meta.GetOperation("Request.Inactivate"); } }
+
         protected IAttributeDefinition DefectName { get { return DefectType.GetAttributeDefinition("Name"); } }
         protected IAttributeDefinition DefectDescription { get { return DefectType.GetAttributeDefinition("Description"); } }
         protected IAttributeDefinition DefectOwners { get { return DefectType.GetAttributeDefinition("Owners"); } }
@@ -146,7 +212,6 @@ namespace VersionOne.ServiceHost.Core.Services
         protected IAttributeDefinition RequestAssetState { get { return RequestType.GetAttributeDefinition("AssetState"); } }
         protected IAttributeDefinition RequestCreateDate { get { return RequestType.GetAttributeDefinition("CreateDate"); } }
         protected IAttributeDefinition RequestCreatedBy { get { return RequestType.GetAttributeDefinition("CreatedBy"); } }
-        protected IOperation RequestInactivate { get { return Central.MetaModel.GetOperation("Request.Inactivate"); } }
         protected IAttributeDefinition StoryName { get { return StoryType.GetAttributeDefinition("Name"); } }
         protected IAttributeDefinition StoryActualInstance { get { return StoryType.GetAttributeDefinition("Reference"); } }
         protected IAttributeDefinition StoryRequests { get { return StoryType.GetAttributeDefinition("Requests"); } }
