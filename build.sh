@@ -68,20 +68,12 @@ if [ -z "$WORKSPACE" ]; then
   export WORKSPACE=`parentwith .git`;
 fi
 
-TOOLSDIRS=". $WORKSPACE/GetBuildTools $WORKSPACE/v1_build_tools $WORKSPACE/../v1_build_tools $WORKSPACE/nuget_tools"
-#TOOLSDIRS="."
-for D in $TOOLSDIRS; do
-  if [ -d "$D/bin" ]; then
-    export BUILDTOOLS_PATH="$D/bin"
-  fi
-done
-
 # Find possible MSBuild paths for .NET 1-4
 FIND_PATH=`bashpath "$SYSTEMROOT\\Microsoft.NET\\Framework"`
-DIRECTORY_ARRAY=("`find "$FIND_PATH" -maxdepth 1 -type d -regextype posix-extended -regex '^.*v[1-4].*'`")
+DIRECTORY_ARRAY=("`find "$FIND_PATH" -maxdepth 1 -type d -regex '^.*v[1-4].*'`")
 # Find possible MSBuild paths for .NET 4.5.1+
 FIND_PATH=`bashpath "$PROGRAMFILES\\MSBuild"`
-DIRECTORY_ARRAY+=("`find "$FIND_PATH" -type d -regextype posix-extended -regex '^.*[1-9][0-9]\..*\\Bin'`")
+DIRECTORY_ARRAY+=("`find "$FIND_PATH" -type d -regex '^.*[1-9][0-9]\..*\\Bin'`")
 # Iterate over all possible MSBuild paths and use the latest.
 ARRAY_LEN=${#DIRECTORY_ARRAY[@]}
 for (( i=0; i<${ARRAY_LEN}; i++ ));
@@ -90,7 +82,7 @@ do
 done
 echo "Using $MSBUILD_PATH for MSBuild"
 
-export PATH="$PATH:$BUILDTOOLS_PATH:$MSBUILD_PATH"
+export PATH="$PATH:$MSBUILD_PATH"
 
 if [ -z "$SIGNING_KEY_DIR" ]; then
   export SIGNING_KEY_DIR=`pwd`;
