@@ -7,108 +7,19 @@
 
 
 
-if [ -d build-tools ]; then cd build-tools && git fetch && git stash && git pull && cd ..; else git clone https://github.com/versionone/openAgile-build-tools.git build-tools; fi
-source ./build-tools/common.sh
-
-# -----------------------------------------------------------------------------
-
-# fix for jenkins inserting the windows-style path in $WORKSPACE
-cd "$WORKSPACE"
-export WORKSPACE=`pwd`
-
-
-
-# ----- Utility functions -----------------------------------------------------
-
-function winpath() {
-  # Convert gitbash style path '/c/Users/Big John/Development' to 'c:\Users\Big John\Development',
-  # via dumb substitution. Handles drive letters; incurs process creation penalty for sed.
-  if [ -e /etc/bash.bashrc ] ; then
-    # Cygwin specific settings
-    echo "`cygpath -w $1`"
-  else
-    # Msysgit specific settings
-    echo "$1" | sed -e 's|^/\(\w\)/|\1:\\|g;s|/|\\|g'
-  fi
-}
-
-function bashpath() {
-  # Convert windows style path 'c:\Users\Big John\Development' to '/c/Users/Big John/Development'
-  # via dumb substitution. Handles drive letters; incurs process creation penalty for sed.
-  if [ -e /etc/bash.bashrc ] ; then
-    # Cygwin specific settings
-    echo `cygpath $1`
-  else
-    # Msysgit specific settings
-    echo "$1" | sed -e 's|\(\w\):|/\1|g;s|\\|/|g'
-  fi
-}
-
-function parentwith() {  # used to find $WORKSPACE, below.
-  # Starting at the current dir and progressing up the ancestors,
-  # retuns the first dir containing $1. If not found returns pwd.
-  SEARCHTERM="$1"
-  DIR=`pwd`
-  while [ ! -e "$DIR/$SEARCHTERM" ]; do
-    NEWDIR=`dirname "$DIR"`
-    if [ "$NEWDIR" = "$DIR" ]; then
-      pwd
-      return
-    fi
-    DIR="$NEWDIR"
-  done
-  echo "$DIR"
-  }
-
-
-# If we aren't running under jenkins. some variables will be unset.
-# So set them to a reasonable value
-
-if [ -z "$WORKSPACE" ]; then
-  export WORKSPACE=`parentwith .git`;
-fi
-
-# Find possible MSBuild paths for .NET 1-4
-FIND_PATH=`bashpath "$SYSTEMROOT\\Microsoft.NET\\Framework"`
-DIRECTORY_ARRAY=("`find "$FIND_PATH" -maxdepth 1 -type d -regex '^.*v[1-4].*'`")
-# Find possible MSBuild paths for .NET 4.5.1+
-FIND_PATH=`bashpath "$PROGRAMFILES\\MSBuild"`
-DIRECTORY_ARRAY+=("`find "$FIND_PATH" -type d -regex '^.*[1-9][0-9]\..*\\Bin'`")
-# Iterate over all possible MSBuild paths and use the latest.
-ARRAY_LEN=${#DIRECTORY_ARRAY[@]}
-for (( i=0; i<${ARRAY_LEN}; i++ ));
-do
-  export MSBUILD_PATH="${DIRECTORY_ARRAY[$i]}"
-done
-echo "Using $MSBUILD_PATH for MSBuild"
-
-export PATH="$PATH:$MSBUILD_PATH"
-
-if [ -z "$SIGNING_KEY_DIR" ]; then
-  export SIGNING_KEY_DIR=`pwd`;
-fi
-
-export SIGNING_KEY="$SIGNING_KEY_DIR/VersionOne.snk"
-
-if [ -f "$SIGNING_KEY" ]; then 
-  export SIGN_ASSEMBLY="true"
+# ----- Common ----------------------------------------------------------------
+# Common build script creates functions and variables expected by Jenkins.
+if [ -d ../build-tools ]; then 
+  cd ../build-tools && git fetch && git stash && git pull
 else
-  export SIGN_ASSEMBLY="false"
-  echo "Please place VersionOne.snk in `pwd` or $SIGNING_KEY_DIR to enable signing.";
+  git clone https://github.com/versionone/openAgile-build-tools.git ../build-tools
 fi
-
-if [ -z "$VERSION_NUMBER" ]; then
-  export VERSION_NUMBER="0.0.0"
-fi
-
-if [ -z "$BUILD_NUMBER" ]; then
-  # presume local workstation, use date-based build number
-  export BUILD_NUMBER=`date +%H%M`  # hour + minute
-fi
+source ../build-tools/common.sh
 
 
 
 # ---- Produce .NET Metadata -------------------------------------------------
+# For each of the components, generate AssemblyInfo.cs.
 COMPONENTS="VersionOne.ServiceHost VersionOne.ServiceHost.Core VersionOne.ServiceHost.SubversionServices"
 for COMPONENT_NAME in $COMPONENTS; do
 cat > "$WORKSPACE/$COMPONENT_NAME/Properties/AssemblyInfo.cs" <<EOF
