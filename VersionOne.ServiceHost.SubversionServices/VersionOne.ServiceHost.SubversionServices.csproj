@@ -15,7 +15,7 @@
     <OldToolsVersion>3.5</OldToolsVersion>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile />
     <PublishUrl>http://localhost/VersionOne.ServiceHost.PremiumSourceServices/</PublishUrl>
     <Install>true</Install>
@@ -70,8 +70,17 @@
     <Reference Include="FSharp.Data.DesignTime">
       <HintPath>..\packages\FSharp.Data.1.1.10\lib\net40\FSharp.Data.DesignTime.dll</HintPath>
     </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Ninject">
+      <HintPath>..\packages\Ninject.3.0.2-unstable-9051\lib\net45-full\Ninject.dll</HintPath>
+    </Reference>
     <Reference Include="OAuth2Client">
-      <HintPath>..\packages\OAuth2Client.1.4.13309.2515\lib\net45\OAuth2Client.dll</HintPath>
+      <HintPath>..\packages\OAuth2Client.1.6.0.2560\lib\net45\OAuth2Client.dll</HintPath>
     </Reference>
     <Reference Include="SharpSvn">
       <HintPath>..\packages\SharpSvn.1.8-x86.1.8004.2609\lib\net20\SharpSvn.dll</HintPath>
@@ -85,9 +94,11 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="VersionOne.SDK.APIClient, Version=14.0.3.227, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\VersionOne.SDK.APIClient.14.0.3.227\lib\net45\VersionOne.SDK.APIClient.dll</HintPath>
+    <Reference Include="VersionOne.SDK.APIClient">
+      <HintPath>..\packages\VersionOne.SDK.APIClient.14.1.1.249\lib\net45\VersionOne.SDK.APIClient.dll</HintPath>
+    </Reference>
+    <Reference Include="VersionOne.ServiceHost.Core">
+      <HintPath>..\packages\VersionOne.ServiceHost.Core.1.0.192.0\lib\net45\VersionOne.ServiceHost.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -101,12 +112,6 @@
     <Compile Include="PropertiesCollection.cs" />
     <Compile Include="SvnConnector.cs" />
     <Compile Include="SvnReaderHostedService.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\VersionOne.ServiceHost.Core\VersionOne.ServiceHost.Core.csproj">
-      <Project>{F432BAC8-27ED-4C2C-8E06-EF806A5B0D79}</Project>
-      <Name>VersionOne.ServiceHost.Core</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
