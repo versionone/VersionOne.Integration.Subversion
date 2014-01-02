@@ -145,6 +145,5 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetDir)" "$(SolutionDir)VersionOne.ServiceHost\$(OutDir)"</PostBuildEvent>
   </PropertyGroup>
 </Project>
