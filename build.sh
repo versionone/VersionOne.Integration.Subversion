@@ -89,4 +89,10 @@ MSBuild.exe $SOLUTION_FILE \
   -p:Platform="$Platform" \
   -p:Verbosity=Diagnostic
 
+export Configuration
 
+# Crate nuget_packages_refresh
+for csproj in */*.csproj
+do
+  $NUGET_EXE pack $csproj
+done
