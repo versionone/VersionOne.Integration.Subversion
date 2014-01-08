@@ -6,6 +6,7 @@
 *.nuspec	text merge=union
 *.config	text
 *.md		text
+*.html      text
 
 # *nix only
 *.sh			eol=lf
