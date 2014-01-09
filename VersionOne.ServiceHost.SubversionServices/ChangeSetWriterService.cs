@@ -113,6 +113,7 @@ namespace VersionOne.ServiceHost.SubversionServices
         {
             Asset changeSet = null;
             AssetList list = FindExistingChangeset(info.Revision, info.RepositoryId).Assets;
+
             if(list.Count > 0) 
             {
                 changeSet = list[0];

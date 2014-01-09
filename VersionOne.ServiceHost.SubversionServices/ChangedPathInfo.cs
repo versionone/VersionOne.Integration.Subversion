@@ -8,7 +8,7 @@ namespace VersionOne.ServiceHost.SubversionServices
 	{
         private readonly SvnChangeItem changeItem;
 
-        // TODO resolve whether this is really required, may be removed or changed to SharpSvn enum type
+        //TODO: resolve whether this is really required, may be removed or changed to SharpSvn enum type
         public SubversionAction Action
         {
             get 

@@ -6,38 +6,47 @@ using VersionOne.ServiceHost.Core.Logging;
 using VersionOne.ServiceHost.Core.Services;
 using VersionOne.ServiceHost.Eventing;
 
-namespace VersionOne.ServiceHost.SubversionServices {
-    public abstract class AbstractRevisionProcessor : IDisposable, IHostedService {
+namespace VersionOne.ServiceHost.SubversionServices 
+{
+    public abstract class AbstractRevisionProcessor : IDisposable, IHostedService 
+    {
         private readonly object _lock = new object();
         protected readonly SvnConnector connector = new SvnConnector();
         protected IEventManager EventManager;
         private IProfile profile;
         protected ILogger Logger;
         private string password;
-
         private string repositoryPath;
         private string username;
 
-        protected virtual int LastRevision {
-            get {
+        protected virtual int LastRevision 
+        {
+            get 
+            {
                 int rev;
                 int.TryParse(profile["Revision"].Value, out rev);
                 return rev;
             }
-            set { profile["Revision"].Value = value.ToString(); }
+            set 
+            { 
+                profile["Revision"].Value = value.ToString(); 
+            }
         }
 
         protected abstract Type PubType { get; }
 
-        protected SvnConnector Connector {
+        protected SvnConnector Connector 
+        {
             get { return connector; }
         }
 
-        protected string RepositoryPath {
+        protected string RepositoryPath 
+        {
             get { return repositoryPath; }
         }
 
-        public void Initialize(XmlElement config, IEventManager eventManager, IProfile profile) {
+        public void Initialize(XmlElement config, IEventManager eventManager, IProfile profile) 
+        {
             this.profile = profile;
 
             repositoryPath = config["RepositoryPath"].InnerText;
@@ -49,7 +58,8 @@ namespace VersionOne.ServiceHost.SubversionServices {
 
             Logger = new Logger(eventManager);
 
-            if(!string.IsNullOrEmpty(username) && password != null) {
+            if(!string.IsNullOrEmpty(username) && password != null) 
+            {
                 connector.SetAuthentication(username, password);
             }
 
@@ -59,13 +69,15 @@ namespace VersionOne.ServiceHost.SubversionServices {
             InternalInitialize(config, eventManager, profile);
         }
 
-        public void Start() {
+        public void Start() 
+        {
             // TODO move subscriptions to timer events, etc. here
         }
 
         protected abstract void InternalInitialize(XmlElement config, IEventManager eventmanager, IProfile profile);
 
-        private void _connector_Error(object sender, SvnExceptionEventArgs e) {
+        private void _connector_Error(object sender, SvnExceptionEventArgs e) 
+        {
             var errorString = string.Format(
                 "Error accessing Subversion repository: Path='{0}', Username='{1}', Password='{2}'. " +
                     "The service will be disabled until ServiceHost is restarted.", repositoryPath, username, password);
@@ -73,49 +85,53 @@ namespace VersionOne.ServiceHost.SubversionServices {
             EventManager.Unsubscribe(PubType, PokeRepository);
         }
 
-        protected void _connector_Revision(object sender, SvnConnector.RevisionArgs e) {
-            if(e.Revision > LastRevision) {
-                lock(_lock) {
-                    if(e.Revision > LastRevision) {
+        protected void _connector_Revision(object sender, SvnConnector.RevisionArgs e) 
+        {
+            if(e.Revision > LastRevision) 
+            {
+                lock(_lock) 
+                {
+                    if(e.Revision > LastRevision) 
+                    {
                         ProcessRevision(e.Revision, e.Author, e.Time, e.Message, e.Changed, e.ChangePathInfos);
                         return;
                     }
                 }
             }
-
             Logger.Log(LogMessage.SeverityType.Debug, string.Format("Ignoring revision {0} - already processed.", e.Revision));
         }
 
-        private void PokeRepository(object pubobj) {
+        private void PokeRepository(object pubobj) 
+        {
             connector.Poke(RepositoryPath, LastRevision);
         }
 
-        protected virtual void ProcessRevision(int revision, string author, DateTime changeDate, string message, IList<string> filesChanged,
-            ChangeSetDictionary changedPathInfos) {
+        protected virtual void ProcessRevision(int revision, string author, DateTime changeDate, string message, IList<string> filesChanged, ChangeSetDictionary changedPathInfos) 
+        {
             LastRevision = revision;
         }
 
         #region Disposal
 
-        public void Dispose() {
+        public void Dispose() 
+        {
             Dispose(true);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="deterministic">True if disposal is deterministic, meaning we should dispose managed objects.</param>
-        private void Dispose(bool deterministic) {
-            if(deterministic) {
+        //True if disposal is deterministic, meaning we should dispose managed objects.
+        private void Dispose(bool deterministic) 
+        {
+            if(deterministic) 
+            {
                 connector.Dispose();
             }
-
             InternalDispose(deterministic);
         }
 
         protected abstract void InternalDispose(bool deterministic);
 
-        ~AbstractRevisionProcessor() {
+        ~AbstractRevisionProcessor() 
+        {
             // When we are GC'd, we don't dispose managed objects - we let the GC handle that
             Dispose(false);
         }

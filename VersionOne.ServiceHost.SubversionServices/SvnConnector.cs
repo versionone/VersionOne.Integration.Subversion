@@ -47,12 +47,16 @@ namespace VersionOne.ServiceHost.SubversionServices
                 Guid uuid;
                 bool result = client.TryGetRepositoryId(new Uri(url), out uuid);
 
-                if(!result) {
+                if(!result) 
+                {
                     OnError(new InvalidOperationException("The url " + url + " is not valid repository path."));
                 }
                 return uuid.ToString();
             } 
-            catch(Exception ex) { OnError(ex); }
+            catch(Exception ex) 
+            { 
+                OnError(ex); 
+            }
             
             return null;
         }
@@ -69,7 +73,10 @@ namespace VersionOne.ServiceHost.SubversionServices
             {
                 client.Info(new SvnUriTarget(url, SvnRevision.Head), InfoReceiver);
             }
-            catch(Exception ex) { OnError(ex); }
+            catch (Exception ex) 
+            { 
+                OnError(ex); 
+            }
         }
 
         private void InfoReceiver(object sender, SvnInfoEventArgs e) 
@@ -83,10 +90,14 @@ namespace VersionOne.ServiceHost.SubversionServices
 			{
                 client.Log(new Uri(url), new SvnLogArgs(new SvnRevisionRange(new SvnRevision(revision), SvnRevision.Head)), LogHandler);
 			}
-			catch (Exception ex) { OnError(ex); }
+			catch (Exception ex) 
+            { 
+                OnError(ex); 
+            }
 		}
 
-        private void LogHandler(object sender, SvnLogEventArgs e) {
+        private void LogHandler(object sender, SvnLogEventArgs e) 
+        {
             try
             {
                 List<string> filesChanged = new List<string>();
@@ -97,7 +108,8 @@ namespace VersionOne.ServiceHost.SubversionServices
                     return;
                 }
 
-                foreach (SvnChangeItem item in e.ChangedPaths) {
+                foreach (SvnChangeItem item in e.ChangedPaths) 
+                {
                     filesChanged.Add(item.Path);
                     changedItems.Add(item.Path, new ChangedPathInfo(item));
                 }
@@ -126,7 +138,8 @@ namespace VersionOne.ServiceHost.SubversionServices
             return target;
         }
 
-        public RevisionPropertyCollection GetRevisionProperties(string url) {
+        public RevisionPropertyCollection GetRevisionProperties(string url) 
+        {
             return GetRevisionProperties(url, SvnRevision.Head);
         }
 
@@ -194,9 +207,11 @@ namespace VersionOne.ServiceHost.SubversionServices
 
                 client.GetPropertyList(new Uri(target), args, out output);
 
-                foreach (SvnPropertyListEventArgs eventArgs in output) {
+                foreach (SvnPropertyListEventArgs eventArgs in output) 
+                {
                     Dictionary<string, string> properties = new Dictionary<string, string>(eventArgs.Properties.Count);
-                    foreach (SvnPropertyValue value in eventArgs.Properties) {
+                    foreach (SvnPropertyValue value in eventArgs.Properties) 
+                    {
                         properties.Add(value.Key, value.StringValue);
                     }
                     result.Add(eventArgs.Path, properties);
@@ -370,10 +385,7 @@ namespace VersionOne.ServiceHost.SubversionServices
 			Dispose(true);
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="deterministic">True if disposal is deterministic, meaning we should dispose managed objects.</param>
+		//True if disposal is deterministic, meaning we should dispose managed objects.
 		private void Dispose(bool deterministic)
 		{
             client.Dispose();
