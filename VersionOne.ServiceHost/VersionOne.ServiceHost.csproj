@@ -158,6 +158,12 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\VersionOne.ServiceHost.SubversionServices\VersionOne.ServiceHost.SubversionServices.csproj">
+      <Project>{29b4b293-3c96-4db7-bb54-5d919c50f1c8}</Project>
+      <Name>VersionOne.ServiceHost.SubversionServices</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

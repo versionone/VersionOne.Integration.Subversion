@@ -83,10 +83,10 @@
       <HintPath>..\packages\OAuth2Client.1.6.0.2560\lib\net45\OAuth2Client.dll</HintPath>
     </Reference>
     <Reference Include="SharpSvn">
-      <HintPath>..\packages\SharpSvn.1.8-x86.1.8005.2809\lib\net20\SharpSvn.dll</HintPath>
+      <HintPath>..\packages\SharpSvn.1.8-x86.1.8005.2818\lib\net20\SharpSvn.dll</HintPath>
     </Reference>
     <Reference Include="SharpSvn.UI">
-      <HintPath>..\packages\SharpSvn.1.8-x86.1.8005.2809\lib\net20\SharpSvn.UI.dll</HintPath>
+      <HintPath>..\packages\SharpSvn.1.8-x86.1.8005.2818\lib\net20\SharpSvn.UI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -145,5 +145,9 @@
   </Target>
   -->
   <PropertyGroup>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>
