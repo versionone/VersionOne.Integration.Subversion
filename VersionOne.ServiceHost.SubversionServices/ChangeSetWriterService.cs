@@ -24,13 +24,13 @@ namespace VersionOne.ServiceHost.SubversionServices
         }
     }
 
-    public class ChangeSetWriterService : V1WriterServiceBase 
+    public class ChangeSetWriterService : V1WriterServiceBase
     {
         private const string ChangeCommentField = "ChangeComment";
         private const string ReferenceAttributeField = "ReferenceAttribute";
         private const string AlwaysCreateField = "AlwaysCreate";
         private const string RepositoryIdField = "RepositoryIdField";
-        private const string FriendlyRepositoryNameField = "RepositoryFriendlyNameField";
+        private const string RepositoryNameField = "RepositoryNameField";
         private const string CustomFieldPrefix = "Custom_";
 
         private bool alwaysCreate;
@@ -55,13 +55,13 @@ namespace VersionOne.ServiceHost.SubversionServices
             XmlElement repositoryIdElement = config[RepositoryIdField];
             if(repositoryIdElement == null || string.IsNullOrEmpty(repositoryIdElement.InnerText)) 
             {
-                throw new ConfigurationException("Mandatory configuration property RepositoryIdField is not provided.");
+                throw new ConfigurationException("Mandatory configuration property RepositoryIdField was not provided.");
             }
 
-            XmlElement repositoryNameElement = config[FriendlyRepositoryNameField];
+            XmlElement repositoryNameElement = config[RepositoryNameField];
             if(repositoryNameElement == null || string.IsNullOrEmpty(repositoryNameElement.InnerText)) 
             {
-                throw new ConfigurationException("Mandatory configuration property RepositoryFriendlyNameField is not provided.");
+                throw new ConfigurationException("Mandatory configuration property RepositoryNameField was not provided.");
             }
 
             customRepositoryIdField = string.Format("{0}{1}", CustomFieldPrefix, repositoryIdElement.InnerText);
@@ -113,6 +113,7 @@ namespace VersionOne.ServiceHost.SubversionServices
         {
             Asset changeSet = null;
             AssetList list = FindExistingChangeset(info.Revision, info.RepositoryId).Assets;
+
             if(list.Count > 0) 
             {
                 changeSet = list[0];
