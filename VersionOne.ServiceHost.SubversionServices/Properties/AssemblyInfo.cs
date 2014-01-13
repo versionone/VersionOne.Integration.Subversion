@@ -13,3 +13,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
+[assembly: ComVisibleAttribute(false)]

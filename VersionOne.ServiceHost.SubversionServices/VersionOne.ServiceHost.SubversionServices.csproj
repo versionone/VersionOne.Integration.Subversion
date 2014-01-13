@@ -61,7 +61,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <PlatformTarget>x86</PlatformTarget>
-    <OutputPath>bin\x86\Release\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
+    <Optimize>true</Optimize>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FSharp.Data">
@@ -97,8 +98,9 @@
     <Reference Include="VersionOne.SDK.APIClient">
       <HintPath>..\packages\VersionOne.SDK.APIClient.14.1.1.249\lib\net45\VersionOne.SDK.APIClient.dll</HintPath>
     </Reference>
-    <Reference Include="VersionOne.ServiceHost.Core">
-      <HintPath>..\packages\VersionOne.ServiceHost.Core.1.0.192.0\lib\net45\VersionOne.ServiceHost.Core.dll</HintPath>
+    <Reference Include="VersionOne.ServiceHost.Core, Version=1.0.194.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\VersionOne.ServiceHost.Core.1.0.194.0\lib\net45\VersionOne.ServiceHost.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -69,7 +69,8 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -108,9 +109,9 @@
     <Reference Include="VersionOne.SDK.APIClient">
       <HintPath>..\packages\VersionOne.SDK.APIClient.14.1.1.249\lib\net45\VersionOne.SDK.APIClient.dll</HintPath>
     </Reference>
-    <Reference Include="VersionOne.ServiceHost.Core, Version=1.0.192.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="VersionOne.ServiceHost.Core, Version=1.0.194.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\VersionOne.ServiceHost.Core.1.0.192.0\lib\net45\VersionOne.ServiceHost.Core.dll</HintPath>
+      <HintPath>..\packages\VersionOne.ServiceHost.Core.1.0.194.0\lib\net45\VersionOne.ServiceHost.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
