@@ -10,8 +10,6 @@ namespace VersionOne.ServiceHost.SubversionServices
 		public readonly IList<string> ChangedFiles;
 		public readonly DateTime ChangeDate;
 		public readonly int Revision;
-        //public readonly string RepositoryId;
-        //public readonly string RepositoryFriendlyName;
 		public readonly IList<string> References;
 	    public readonly LinkInfo Link;
 		
@@ -19,8 +17,6 @@ namespace VersionOne.ServiceHost.SubversionServices
                              DateTime changeDate, IList<string> references, LinkInfo link, string repositoryFriendlyName) 
             : this(author, message, changedFiles, revision, changeDate, references)
         {
-            //RepositoryId = repositoryId;
-            //RepositoryFriendlyName = repositoryFriendlyName;
             Link = link;
         }
 
