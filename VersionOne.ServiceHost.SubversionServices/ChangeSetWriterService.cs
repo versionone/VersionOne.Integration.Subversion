@@ -29,14 +29,9 @@ namespace VersionOne.ServiceHost.SubversionServices
         private const string ChangeCommentField = "ChangeComment";
         private const string ReferenceAttributeField = "ReferenceAttribute";
         private const string AlwaysCreateField = "AlwaysCreate";
-        private const string RepositoryIdField = "RepositoryIdField";
-        private const string RepositoryNameField = "RepositoryNameField";
-        private const string CustomFieldPrefix = "Custom_";
 
         private bool alwaysCreate;
         private string changecomment;
-        private string customRepositoryFriendlyNameField;
-        private string customRepositoryIdField;
         private string referencename;
 
         public override void Initialize(XmlElement config, IEventManager eventManager, IProfile profile) 
@@ -51,21 +46,6 @@ namespace VersionOne.ServiceHost.SubversionServices
                 bool.TryParse(config[AlwaysCreateField].InnerText, out alwaysCreateValue);
             }
             alwaysCreate = alwaysCreateValue;
-
-            XmlElement repositoryIdElement = config[RepositoryIdField];
-            if(repositoryIdElement == null || string.IsNullOrEmpty(repositoryIdElement.InnerText)) 
-            {
-                throw new ConfigurationException("Mandatory configuration property RepositoryIdField was not provided.");
-            }
-
-            XmlElement repositoryNameElement = config[RepositoryNameField];
-            if(repositoryNameElement == null || string.IsNullOrEmpty(repositoryNameElement.InnerText)) 
-            {
-                throw new ConfigurationException("Mandatory configuration property RepositoryNameField was not provided.");
-            }
-
-            customRepositoryIdField = string.Format("{0}{1}", CustomFieldPrefix, repositoryIdElement.InnerText);
-            customRepositoryFriendlyNameField = string.Format("{0}{1}", CustomFieldPrefix, repositoryNameElement.InnerText);
 
             VerifyMeta();
             eventManager.Subscribe(typeof(ChangeSetInfo), ChangeSetListener);
@@ -112,7 +92,7 @@ namespace VersionOne.ServiceHost.SubversionServices
         private Asset GetChangeSet(ChangeSetInfo info, IList<Oid> affectedworkitems) 
         {
             Asset changeSet = null;
-            AssetList list = FindExistingChangeset(info.Revision, info.RepositoryId).Assets;
+            AssetList list = FindExistingChangeset(info.Revision).Assets;
 
             if(list.Count > 0) 
             {
@@ -125,7 +105,6 @@ namespace VersionOne.ServiceHost.SubversionServices
                 {
                     changeSet = V1Connection.Data.New(ChangeSetType, Oid.Null);
                     changeSet.SetAttributeValue(ChangeSetReferenceDef, info.Revision);
-                    changeSet.SetAttributeValue(ChangeSetRepositoryIdDef, info.RepositoryId);
                 } 
                 else 
                 {
@@ -140,7 +119,7 @@ namespace VersionOne.ServiceHost.SubversionServices
             return (alwaysCreate || (affectedworkitems.Count > 0));
         }
 
-        private QueryResult FindExistingChangeset(int revision, string repositoryId) 
+        private QueryResult FindExistingChangeset(int revision) 
         {
             var q = new Query(ChangeSetType);
             q.Selection.Add(ChangeSetType.GetAttributeDefinition("Reference"));
@@ -150,13 +129,6 @@ namespace VersionOne.ServiceHost.SubversionServices
             referenceTerm.Equal(revision);
 
             IFilterTerm term = referenceTerm;
-
-            if(!string.IsNullOrEmpty(customRepositoryIdField) && !string.IsNullOrEmpty(repositoryId)) 
-            {
-                var uuidTerm = new FilterTerm(ChangeSetType.GetAttributeDefinition(customRepositoryIdField));
-                uuidTerm.Equal(repositoryId);
-                term = new AndFilterTerm(referenceTerm, uuidTerm);
-            }
 
             q.Filter = term;
             q.Paging = new Paging(0, 1);
@@ -217,16 +189,6 @@ namespace VersionOne.ServiceHost.SubversionServices
             changeSet.SetAttributeValue(ChangeSetNameDef, string.Format("'{0}' on '{1}'", info.Author, GetFormattedTime(info.ChangeDate)));
             changeSet.SetAttributeValue(ChangeSetDescriptionDef, info.Message);
 
-            if(!string.IsNullOrEmpty(info.RepositoryId) && !string.IsNullOrEmpty(customRepositoryIdField)) 
-            {
-                changeSet.SetAttributeValue(ChangeSetRepositoryIdDef, info.RepositoryId);
-            }
-
-            if(!string.IsNullOrEmpty(info.RepositoryFriendlyName) && !string.IsNullOrEmpty(customRepositoryFriendlyNameField)) 
-            {
-                changeSet.SetAttributeValue(ChangeSetRepositoryFriendlyNameDef, info.RepositoryFriendlyName);
-            }
-
             foreach(Oid oid in primaryworkitems) 
             {
                 changeSet.AddAttributeValue(ChangeSetPrimaryWorkitemsDef, oid);
@@ -275,8 +237,6 @@ namespace VersionOne.ServiceHost.SubversionServices
         private IAttributeDefinition ChangeSetNameDef { get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet.Name"); } }
         private IAttributeDefinition ChangeSetReferenceDef { get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet.Reference"); } }
         private IAttributeDefinition ChangeSetDescriptionDef { get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet.Description"); } }
-        private IAttributeDefinition ChangeSetRepositoryIdDef { get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet." + customRepositoryIdField); } }
-        private IAttributeDefinition ChangeSetRepositoryFriendlyNameDef { get { return V1Connection.Meta.GetAttributeDefinition("ChangeSet." + customRepositoryFriendlyNameField); } }
         private IAssetType PrimaryWorkitemType { get { return V1Connection.Meta.GetAssetType("PrimaryWorkitem"); } }
         private IAttributeDefinition PrimaryWorkitemReferenceDef { get { return V1Connection.Meta.GetAttributeDefinition("PrimaryWorkitem.ChildrenMeAndDown." + referencename); } }
         private IAttributeDefinition LinkNameDef { get { return V1Connection.Meta.GetAttributeDefinition("Link.Name"); } }
