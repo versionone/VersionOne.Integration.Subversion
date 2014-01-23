@@ -22,3 +22,11 @@ The original software is available from:
 
 This software is available under an Apache License v2.0:
   https://github.com/ninject/ninject/blob/master/LICENSE.txt
+  
+JSON parsing is provided by Json.NET, which is open-source software.
+
+The original software is available from:
+  http://james.newtonking.com/json
+  
+This software is available under an MIT License:
+  https://raw.github.com/JamesNK/Newtonsoft.Json/master/LICENSE.md
