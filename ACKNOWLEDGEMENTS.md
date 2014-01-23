@@ -30,3 +30,11 @@ The original software is available from:
   
 This software is available under an MIT License:
   https://raw.github.com/JamesNK/Newtonsoft.Json/master/LICENSE.md
+  
+Subversion connection is provided by the SharpSvn Project, which is open-source software.
+
+The original software is available from:
+  https://sharpsvn.open.collab.net/
+  
+This software is available under an Apache License v2.0:
+  http://www.apache.org/licenses/LICENSE-2.0
