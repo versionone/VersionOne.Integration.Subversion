@@ -45,7 +45,7 @@
                 "date": "2012-11-01T00:00:00.000Z",
                 "description": "Winter 2012",
                 "version": "8.3.0",
-                "releaseNotes": "* Updated: Sharp SVN DLL to 1.7. \n * Added: Logging of connection information on start-up.",
+                "releaseNotes": "* Updated: Sharp SVN DLL to 1.7.\n* Added: Logging of connection information on start-up.",
                 "qualityBand": "seed",
                 "downloadUrl": "http://platform.versionone.com.s3.amazonaws.com/downloads/V1SvnIntegration.8.3.zip"
             },
