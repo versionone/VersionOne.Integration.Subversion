@@ -1,0 +1,9 @@
+{
+    "solution": "VersionOne.Integration.Subversion.sln",    
+    "nugetSources": "http://packages.nuget.org/api/v2/;http://www.myget.org/F/versionone/api/v2/",
+    "projectToPackage": "VersionOne.ServiceHost\\VersionOne.ServiceHost.csproj,VersionOne.ServiceHost.SubversionServices\\VersionOne.ServiceHost.SubversionServices.csproj",
+    "configuration": "Release",
+    "platform": "Any CPU",    
+    "major": "9",
+    "minor": "0"
+}
