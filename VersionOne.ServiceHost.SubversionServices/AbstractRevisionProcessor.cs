@@ -18,6 +18,7 @@ namespace VersionOne.ServiceHost.SubversionServices
         private string password;
         private string repositoryPath;
         private string username;
+		private string ssloverride;
 
         protected virtual int LastRevision 
         {
@@ -52,6 +53,7 @@ namespace VersionOne.ServiceHost.SubversionServices
             repositoryPath = config["RepositoryPath"].InnerText;
             username = (config["UserName"] != null) ? config["UserName"].InnerText : string.Empty;
             password = (config["Password"] != null) ? config["Password"].InnerText : string.Empty;
+			ssloverride = (config["SSLOverride"] != null) ? config["SSLOverride"].InnerText : string.Empty;
 
             EventManager = eventManager;
             EventManager.Subscribe(PubType, PokeRepository);
@@ -60,7 +62,7 @@ namespace VersionOne.ServiceHost.SubversionServices
 
             if(!string.IsNullOrEmpty(username) && password != null) 
             {
-                connector.SetAuthentication(username, password);
+                connector.SetAuthentication(username, password, ssloverride);
             }
 
             connector.Revision += _connector_Revision;
